@@ -53,4 +53,15 @@ public class TodoRepositoryQueryImpl implements TodoRepositoryQuery {
 
         return new PageImpl<>(response, pageable, total);
     }
+
+    @Override
+    public Optional<Todo> findByIdWithUser(Long todoId) {
+        return Optional.ofNullable(jpaQueryFactory.select(todo)
+            .from(todo)
+            .leftJoin(todo.user)
+            .fetchJoin()
+            .where(todo.id.eq(todoId))
+            .fetchOne()
+        );
+    }
 }
