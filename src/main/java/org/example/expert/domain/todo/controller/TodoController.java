@@ -12,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+
 @RestController
 @RequiredArgsConstructor
 public class TodoController {
@@ -20,18 +22,21 @@ public class TodoController {
 
     @PostMapping("/todos")
     public ResponseEntity<TodoSaveResponse> saveTodo(
-            @Auth AuthUser authUser,
-            @Valid @RequestBody TodoSaveRequest todoSaveRequest
+        @Auth AuthUser authUser,
+        @Valid @RequestBody TodoSaveRequest todoSaveRequest
     ) {
         return ResponseEntity.ok(todoService.saveTodo(authUser, todoSaveRequest));
     }
 
     @GetMapping("/todos")
     public ResponseEntity<Page<TodoResponse>> getTodos(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size
+        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(name = "weather", required = false) String weather,
+        @RequestParam(name = "startDate", required = false) LocalDateTime startDate,
+        @RequestParam(name = "endDate", required = false) LocalDateTime endDate
     ) {
-        return ResponseEntity.ok(todoService.getTodos(page, size));
+        return ResponseEntity.ok(todoService.getTodos(page, size, weather, startDate, endDate));
     }
 
     @GetMapping("/todos/{todoId}")
