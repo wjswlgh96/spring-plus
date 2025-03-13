@@ -8,76 +8,80 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.expert.config.JwtUtil;
 import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.user.enums.UserRole;
-import org.example.expert.domain.user.repository.UserRepository;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
 @Slf4j
-public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
+@Component
+@RequiredArgsConstructor
+public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
 
-    public JwtAuthorizationFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
-        super(authenticationManager);
-        this.jwtUtil = jwtUtil;
-    }
-
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+    protected void doFilterInternal(
+        HttpServletRequest request,
+        @NonNull HttpServletResponse response,
+        @NonNull FilterChain chain
+    ) throws IOException, ServletException {
         String bearerJwt = request.getHeader("Authorization");
 
-        String requestURI = request.getRequestURI();
-        if (requestURI.startsWith("/auth") || requestURI.startsWith("/h2-console")) {
-            chain.doFilter(request, response);
-            return;
-        }
+        if (bearerJwt != null && bearerJwt.startsWith("Bearer ")) {
+            String jwt = jwtUtil.substringToken(bearerJwt);
 
-        if (bearerJwt == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "JWT 토큰이 필요합니다.");
-            return;
-        }
+            try {
+                Claims claims = jwtUtil.extractClaims(jwt);
 
-        String jwt = jwtUtil.substringToken(bearerJwt);
+                if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                    setAuthentication(claims);
+                }
 
-        try {
-            Claims claims = jwtUtil.extractClaims(jwt);
-            if (claims == null) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "잘못된 JWT 토큰입니다.");
+            }  catch (SecurityException | MalformedJwtException e) {
+                log.error("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.", e);
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않는 JWT 서명입니다.");
+                return;
+            } catch (ExpiredJwtException e) {
+                log.error("Expired JWT token, 만료된 JWT token 입니다.", e);
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "만료된 JWT 토큰입니다.");
+                return;
+            } catch (UnsupportedJwtException e) {
+                log.error("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.", e);
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "지원되지 않는 JWT 토큰입니다.");
+                return;
+            } catch (Exception e) {
+                log.error("Internal server error", e);
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 return;
             }
+        }
 
-            Long userId = Long.parseLong(claims.getSubject());
+        chain.doFilter(request, response);
+    }
+
+    private void setAuthentication(Claims claims) {
+        try {
+            Long userId = Long.valueOf(claims.getSubject());
             String email = claims.get("email", String.class);
             UserRole userRole = UserRole.valueOf(claims.get("userRole", String.class));
             String nickname = claims.get("nickname", String.class);
 
             AuthUser authUser = new AuthUser(userId, email, userRole, nickname);
-            UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(authUser, null, authUser.getAuthorities());
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            chain.doFilter(request, response);
-        } catch (SecurityException | MalformedJwtException e) {
-            log.error("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.", e);
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않는 JWT 서명입니다.");
-        } catch (ExpiredJwtException e) {
-            log.error("Expired JWT token, 만료된 JWT token 입니다.", e);
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "만료된 JWT 토큰입니다.");
-        } catch (UnsupportedJwtException e) {
-            log.error("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.", e);
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "지원되지 않는 JWT 토큰입니다.");
-        } catch (Exception e) {
-            log.error("Internal server error", e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            JwtAuthenticationToken authenticationToken = new JwtAuthenticationToken(authUser);
+            
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);    
+        } catch (Exception ex) {
+            log.error("Failed to set authentication. Clearing SecurityContext.", ex);
+            SecurityContextHolder.clearContext();
+            throw new SecurityException("유효하지 않은 JWT 토큰입니다.");
         }
     }
 }

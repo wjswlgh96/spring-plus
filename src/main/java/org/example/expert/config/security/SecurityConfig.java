@@ -1,19 +1,19 @@
 package org.example.expert.config.security;
 
 import lombok.RequiredArgsConstructor;
-import org.example.expert.config.JwtUtil;
 import org.example.expert.domain.user.enums.UserRole;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -23,36 +23,37 @@ import java.util.List;
 @Configuration
 @RequiredArgsConstructor
 @EnableWebSecurity
+@EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
 
-    private final JwtUtil jwtUtil;
+    private final JwtAuthorizationFilter jwtAuthorizationFilter;
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, AuthenticationManager authenticationManager) throws Exception {
-
-        JwtAuthorizationFilter jwtAuthorizationFilter =
-            new JwtAuthorizationFilter(authenticationManager, jwtUtil);
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
 
         return httpSecurity
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .csrf(AbstractHttpConfigurer::disable)
-            .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
+            .anonymous(AbstractHttpConfigurer::disable)
             .formLogin(AbstractHttpConfigurer::disable)
+            .logout(AbstractHttpConfigurer::disable)
             .httpBasic(AbstractHttpConfigurer::disable)
-            .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
+            .rememberMe(AbstractHttpConfigurer::disable)
+            .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))    // h2-console xFrame 오류 해결
+            .addFilterBefore(jwtAuthorizationFilter, SecurityContextHolderAwareRequestFilter.class)
             .authorizeHttpRequests(
                 auth ->
                     auth
-                        .requestMatchers("/auth/**", "/h2-console/**").permitAll()          // 인증 없이 허용
-                        .requestMatchers("/admin/**").hasAuthority(UserRole.ADMIN.name())     // /admin 하위 path는 UserRole이 ADMIN 이어야 허용
-                        .anyRequest().authenticated()                                           // 나머지는 인증 필요함
+                        .requestMatchers("/auth/**", "/h2-console/**").permitAll()                      // 인증 없이 허용
+                        .requestMatchers("/admin/**").hasAuthority(UserRole.Authority.ADMIN)              // '/admin' 하위 path는 UserRole이 ADMIN 이어야 허용
+                        .anyRequest().authenticated()                                                       // 나머지는 인증 필요함
             )
             .exceptionHandling(ex -> ex.accessDeniedHandler(new AccessDeniedHandler()))
             .build();
