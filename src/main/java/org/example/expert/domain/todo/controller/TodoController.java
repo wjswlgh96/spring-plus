@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.expert.domain.common.annotation.Auth;
 import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.todo.dto.request.TodoSaveRequest;
+import org.example.expert.domain.todo.dto.response.TodoQueryResponse;
 import org.example.expert.domain.todo.dto.response.TodoResponse;
 import org.example.expert.domain.todo.dto.response.TodoSaveResponse;
 import org.example.expert.domain.todo.service.TodoService;
@@ -26,6 +27,17 @@ public class TodoController {
         @Valid @RequestBody TodoSaveRequest todoSaveRequest
     ) {
         return ResponseEntity.ok(todoService.saveTodo(authUser, todoSaveRequest));
+    }
+
+    @GetMapping("/todos-query")
+    public ResponseEntity<Page<TodoQueryResponse>> getTodosQuery(
+        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(name = "search", required = false) String search,
+        @RequestParam(name = "startDate", required = false) LocalDateTime startDate,
+        @RequestParam(name = "endDate", required = false) LocalDateTime endDate
+    ) {
+        return ResponseEntity.ok(todoService.getTodosQuery(page, size, search, startDate, endDate));
     }
 
     @GetMapping("/todos")
