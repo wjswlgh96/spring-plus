@@ -1,4 +1,4 @@
-package org.example.expert.config.security;
+package org.example.expert.common.exception;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

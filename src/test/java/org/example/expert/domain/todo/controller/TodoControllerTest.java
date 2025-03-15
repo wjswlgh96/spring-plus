@@ -1,10 +1,10 @@
 package org.example.expert.domain.todo.controller;
 
-import org.example.expert.config.JwtUtil;
-import org.example.expert.config.security.JwtAuthenticationToken;
-import org.example.expert.config.security.SecurityConfig;
+import org.example.expert.utils.JwtUtil;
+import org.example.expert.common.secutiry.JwtAuthenticationToken;
+import org.example.expert.common.config.SecurityConfig;
 import org.example.expert.domain.common.dto.AuthUser;
-import org.example.expert.domain.common.exception.InvalidRequestException;
+import org.example.expert.common.exception.InvalidRequestException;
 import org.example.expert.domain.todo.dto.response.TodoResponse;
 import org.example.expert.domain.todo.service.TodoService;
 import org.example.expert.domain.user.dto.response.UserResponse;

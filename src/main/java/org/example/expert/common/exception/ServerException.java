@@ -1,4 +1,4 @@
-package org.example.expert.domain.common.exception;
+package org.example.expert.common.exception;
 
 public class ServerException extends RuntimeException {
 

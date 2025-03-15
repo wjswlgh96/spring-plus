@@ -1,4 +1,4 @@
-package org.example.expert.config.security;
+package org.example.expert.common.secutiry;
 
 import org.example.expert.domain.common.dto.AuthUser;
 import org.springframework.security.authentication.AbstractAuthenticationToken;

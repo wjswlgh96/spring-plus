@@ -1,6 +1,8 @@
-package org.example.expert.config.security;
+package org.example.expert.common.config;
 
 import lombok.RequiredArgsConstructor;
+import org.example.expert.common.exception.AccessDeniedHandler;
+import org.example.expert.common.secutiry.JwtAuthorizationFilter;
 import org.example.expert.domain.user.enums.UserRole;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,7 +53,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(
                 auth ->
                     auth
-                        .requestMatchers("/auth/**", "/h2-console/**").permitAll()                      // 인증 없이 허용
+                        .requestMatchers("/auth/**", "/h2-console/**", "/health-check").permitAll()                      // 인증 없이 허용
                         .requestMatchers("/admin/**").hasAuthority(UserRole.Authority.ADMIN)              // '/admin' 하위 path는 UserRole이 ADMIN 이어야 허용
                         .anyRequest().authenticated()                                                       // 나머지는 인증 필요함
             )

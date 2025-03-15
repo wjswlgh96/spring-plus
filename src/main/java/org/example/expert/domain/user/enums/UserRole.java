@@ -2,7 +2,7 @@ package org.example.expert.domain.user.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.example.expert.domain.common.exception.InvalidRequestException;
+import org.example.expert.common.exception.InvalidRequestException;
 
 import java.util.Arrays;
 

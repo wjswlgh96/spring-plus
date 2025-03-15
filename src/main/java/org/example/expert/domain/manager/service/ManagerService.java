@@ -2,9 +2,7 @@ package org.example.expert.domain.manager.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.expert.domain.common.dto.AuthUser;
-import org.example.expert.domain.common.exception.InvalidRequestException;
-import org.example.expert.domain.log.entity.Log;
-import org.example.expert.domain.log.repository.LogRepository;
+import org.example.expert.common.exception.InvalidRequestException;
 import org.example.expert.domain.log.service.LogService;
 import org.example.expert.domain.manager.dto.request.ManagerSaveRequest;
 import org.example.expert.domain.manager.dto.response.ManagerResponse;
