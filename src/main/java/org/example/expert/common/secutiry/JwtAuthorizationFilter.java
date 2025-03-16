@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -69,7 +70,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     private void setAuthentication(Claims claims) {
         try {
-            Long userId = Long.valueOf(claims.getSubject());
+            UUID userId = UUID.fromString(claims.getSubject());
             String email = claims.get("email", String.class);
             UserRole userRole = UserRole.valueOf(claims.get("userRole", String.class));
             String nickname = claims.get("nickname", String.class);

@@ -11,6 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+import java.util.UUID;
+
 @RestController
 @RequiredArgsConstructor
 public class UserController {
@@ -18,13 +21,19 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/users/{userId}")
-    public ResponseEntity<UserResponse> getUser(@PathVariable long userId) {
+    public ResponseEntity<UserResponse> getUser(@PathVariable UUID userId) {
         return ResponseEntity.ok(userService.getUser(userId));
     }
 
     @PutMapping("/users")
     public void changePassword(@Auth AuthUser authUser, @RequestBody UserChangePasswordRequest userChangePasswordRequest) {
         userService.changePassword(authUser.getId(), userChangePasswordRequest);
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<UserResponse> getUsers(@RequestParam(name = "nickname") String nickname) {
+        UserResponse response = userService.getUsersByNickname(nickname);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/users/profile-image")

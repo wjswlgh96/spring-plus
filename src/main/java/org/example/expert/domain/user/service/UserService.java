@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -36,13 +38,13 @@ public class UserService {
     private final S3Client s3Client;
     private final PasswordEncoder passwordEncoder;
 
-    public UserResponse getUser(long userId) {
+    public UserResponse getUser(UUID userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new InvalidRequestException("User not found"));
         return new UserResponse(user.getId(), user.getEmail());
     }
 
     @Transactional
-    public void changePassword(long userId, UserChangePasswordRequest userChangePasswordRequest) {
+    public void changePassword(UUID userId, UserChangePasswordRequest userChangePasswordRequest) {
         validateNewPassword(userChangePasswordRequest);
 
         User user = userRepository.findById(userId)
@@ -59,8 +61,15 @@ public class UserService {
         user.changePassword(passwordEncoder.encode(userChangePasswordRequest.getNewPassword()));
     }
 
+    public UserResponse getUsersByNickname(String nickname) {
+        User findUser = userRepository.findAllByNickname(nickname)
+            .orElseThrow(() -> new InvalidRequestException("User not found"));
+
+        return new UserResponse(findUser.getId(), findUser.getEmail());
+    }
+
     @Transactional
-    public UserProfileUrlResponse updateProfileImage(Long userId, MultipartFile profileImage) {
+    public UserProfileUrlResponse updateProfileImage(UUID userId, MultipartFile profileImage) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new InvalidRequestException("User not found"));
 
@@ -93,7 +102,7 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteProfileImage(Long userId) {
+    public void deleteProfileImage(UUID userId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new InvalidRequestException("User not found"));
 

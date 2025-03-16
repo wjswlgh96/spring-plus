@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.UUID;
+
 @RestController
 @RequiredArgsConstructor
 public class UserAdminController {
@@ -15,7 +17,7 @@ public class UserAdminController {
     private final UserAdminService userAdminService;
 
     @PatchMapping("/admin/users/{userId}")
-    public void changeUserRole(@PathVariable long userId, @RequestBody UserRoleChangeRequest userRoleChangeRequest) {
+    public void changeUserRole(@PathVariable UUID userId, @RequestBody UserRoleChangeRequest userRoleChangeRequest) {
         userAdminService.changeUserRole(userId, userRoleChangeRequest);
     }
 }

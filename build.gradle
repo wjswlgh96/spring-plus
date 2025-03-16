@@ -30,14 +30,10 @@ dependencies {
     implementation 'software.amazon.awssdk:s3:2.20.30'
 
     compileOnly 'org.projectlombok:lombok'
-    runtimeOnly 'com.h2database:h2'
     runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-    // bcrypt
-    implementation 'at.favre.lib:bcrypt:0.10.2'
 
     // security
     implementation 'org.springframework.boot:spring-boot-starter-security'

@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
@@ -41,7 +42,7 @@ class TodoControllerTest {
         // given
         long todoId = 1L;
         String title = "title";
-        AuthUser authUser = new AuthUser(1L, "email", UserRole.ROLE_USER, "user");
+        AuthUser authUser = new AuthUser(UUID.randomUUID(), "email", UserRole.ROLE_USER, "user");
 
         JwtAuthenticationToken token = new JwtAuthenticationToken(authUser);
 
@@ -73,7 +74,7 @@ class TodoControllerTest {
     void todo_단건_조회_시_todo가_존재하지_않아_예외가_발생한다() throws Exception {
         // given
         long todoId = 1L;
-        AuthUser authUser = new AuthUser(2L, "email", UserRole.ROLE_USER, "user");
+        AuthUser authUser = new AuthUser(UUID.randomUUID(), "email", UserRole.ROLE_USER, "user");
 
         JwtAuthenticationToken token = new JwtAuthenticationToken(authUser);
 

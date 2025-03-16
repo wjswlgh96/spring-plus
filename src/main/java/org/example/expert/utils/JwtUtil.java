@@ -15,6 +15,7 @@ import org.springframework.util.StringUtils;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
+import java.util.UUID;
 
 @Slf4j(topic = "JwtUtil")
 @Component
@@ -34,7 +35,7 @@ public class JwtUtil {
         key = Keys.hmacShaKeyFor(bytes);
     }
 
-    public String createToken(Long userId, String email, UserRole userRole, String nickname) {
+    public String createToken(UUID userId, String email, UserRole userRole, String nickname) {
         Date date = new Date();
 
         return BEARER_PREFIX +
