@@ -54,8 +54,8 @@ public class SecurityConfig {
                 auth ->
                     auth
                         .requestMatchers("/auth/**", "/h2-console/**", "/health-check").permitAll()                      // 인증 없이 허용
-                        .requestMatchers("/admin/**").hasAuthority(UserRole.Authority.ADMIN)              // '/admin' 하위 path는 UserRole이 ADMIN 이어야 허용
-                        .anyRequest().authenticated()                                                       // 나머지는 인증 필요함
+                        .requestMatchers("/admin/**").hasAuthority(UserRole.Authority.ADMIN)                                 // '/admin' 하위 path는 UserRole이 ADMIN 이어야 허용
+                        .anyRequest().authenticated()                                                                          // 나머지는 인증 필요함
             )
             .exceptionHandling(ex -> ex.accessDeniedHandler(new AccessDeniedHandler()))
             .build();
