@@ -8,7 +8,7 @@
 
 ### ✅ RDS
 
-![Image](https://github.com/user-attachments/assets/fb5b0728-e3b4-4a67-b8d3-f1babb6ed6fc)
+![Image](https://github.com/user-attachments/assets/cdb67034-d3ae-45c0-8893-c63edbdd626e)
 
 ### ✅ S3
 
